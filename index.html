@@ -2,40 +2,67 @@
 <html lang="da">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Klipathon – fanside</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff;--card:#f3f3f5;--tx:#121214;--mu:#595961;--ac:#7a3fe0;--ac2:#9a5af6;--ln:#d6d6dc}
+:root{--bg:#fff;--card:#f3f3f5;--tx:#121214;--mu:#595961;--ac:#7a3fe0;--ac2:#9a5af6;--ln:#d6d6dc;--w:min(100vw,calc(100vh*9/16));--h:100vh}
+@supports (height:100dvh){:root{--w:min(100vw,calc(100dvh*9/16));--h:100dvh}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 Poppins,'Helvetica Neue',Arial,sans-serif}
-header,main,footer{max-width:560px;margin:0 auto;padding:16px}
-header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-h1,h2,.ttl{font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em}
-h1{margin:0;font-size:32px;line-height:1}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+body{color:var(--tx);font:16px/1.45 Poppins,'Helvetica Neue',Arial,sans-serif}
+h1,h2{font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em}
 h2{font-size:28px;line-height:1.1}
-nav{display:flex;gap:8px;flex-wrap:wrap}
 button,select,input{font:inherit}
 button{min-height:44px;padding:0 18px;border-radius:22px;border:2px solid var(--tx);background:transparent;color:var(--tx);cursor:pointer;font-weight:600}
-button.pri,button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
 button:focus-visible,input:focus-visible,select:focus-visible,video:focus-visible{outline:3px solid var(--ac2);outline-offset:2px}
-.strip{background:linear-gradient(90deg,#9a5af6,#6d3ad6);color:#fff;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:600;margin-bottom:12px}
-#tabs{display:flex;gap:8px;margin-bottom:12px}
-.card{background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:14px}
-.card video{display:block;width:100%;max-height:70vh;background:#000}
-.row{display:flex;align-items:center;gap:12px;padding:12px 14px}
-.meta{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
-.meta b{font-weight:700}
-.chip{font-size:12px;font-weight:600;color:#fff;background:var(--tx);border-radius:20px;padding:3px 10px}
-.lnk{min-height:32px;padding:0;border:0;color:var(--mu);font-size:13px;font-weight:400;text-decoration:underline}
-.vote{min-width:64px;min-height:56px;border-radius:12px;border:0;background:var(--tx);color:#fff;font-weight:700;line-height:1.2}
-.vote.on{background:var(--ac);color:#fff}
-.empty{color:var(--mu);text-align:center;padding:32px 0}
-footer{font-size:12px;color:var(--mu);text-align:center}
-footer button{min-height:32px;border:0;color:var(--mu);text-decoration:underline;padding:0 6px;font-weight:400}
-dialog{background:#fff;color:var(--tx);border:2px solid var(--tx);border-radius:14px;width:min(520px,94vw);padding:18px}
+
+/* Feed: ét klip ad gangen */
+#feed{position:fixed;inset:0;overflow-y:scroll;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none;background:#000;outline:none}
+#feed::-webkit-scrollbar{display:none}
+@media (prefers-reduced-motion:no-preference){#feed{scroll-behavior:smooth}}
+.slide{height:var(--h);scroll-snap-align:start;scroll-snap-stop:always;display:flex;justify-content:center;background:#000}
+.stage{position:relative;height:100%;width:var(--w);background:#000;overflow:hidden}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;cursor:pointer}
+.stage video.land{object-fit:contain}
+.shade{position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(transparent,rgba(0,0,0,.72));pointer-events:none}
+.info{position:absolute;left:14px;right:84px;bottom:calc(46px + env(safe-area-inset-bottom));color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.info b{font-size:18px;font-weight:700;line-height:1.25}
+.chip{font-size:13px;font-weight:600;color:#fff;background:var(--ac);border-radius:20px;padding:3px 12px;text-shadow:none}
+.side{position:absolute;right:10px;bottom:calc(52px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:14px}
+.side button{min-height:0;min-width:0;padding:0;border:0;color:#fff;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.side .ic{width:54px;height:54px;border-radius:27px;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+.side button.on .ic{background:var(--ac)}
+.side svg{width:26px;height:26px}
+.side .small .ic{width:44px;height:44px}
+.side .small svg{width:20px;height:20px}
+.pp{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:38px;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;pointer-events:none}
+.pp.show{display:flex}
+.pp svg{width:34px;height:34px}
+.prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.25)}
+.prog i{display:block;height:100%;width:100%;background:#fff;transform-origin:left;transform:scaleX(0)}
+.empty{height:var(--h);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:0 32px;font-weight:600}
+
+/* Faste elementer ovenpå feedet */
+.top,.bottom{position:fixed;left:50%;transform:translateX(-50%);width:var(--w);z-index:5;color:#fff;pointer-events:none}
+.top{top:0;padding:calc(10px + env(safe-area-inset-top)) 12px 28px;background:linear-gradient(rgba(0,0,0,.7),transparent)}
+.top>*{pointer-events:auto}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.top h1{margin:0;font-size:28px;line-height:1}
+#nav{display:flex;gap:6px}
+#nav button{min-height:38px;padding:0 14px;font-size:14px;border:2px solid #fff;color:#fff;background:rgba(0,0,0,.3)}
+#nav button.pri{background:var(--ac);border-color:var(--ac)}
+#tabs{display:flex;justify-content:center;gap:18px;margin-top:6px}
+#tabs button{min-height:36px;padding:0 4px;border:0;border-radius:0;border-bottom:3px solid transparent;color:rgba(255,255,255,.75);font-size:15px}
+#tabs button.on{color:#fff;border-bottom-color:var(--ac2)}
+.bottom{bottom:0;padding:18px 12px calc(8px + env(safe-area-inset-bottom));font-size:11px;text-align:center;background:linear-gradient(transparent,rgba(0,0,0,.65));text-shadow:0 1px 2px rgba(0,0,0,.7)}
+.bottom button{pointer-events:auto;min-height:28px;padding:0 4px;border:0;border-radius:0;color:#fff;font-size:11px;font-weight:400;text-decoration:underline;text-shadow:inherit}
+
+/* Dialoger */
+dialog{background:#fff;color:var(--tx);border:2px solid var(--tx);border-radius:14px;width:min(520px,94vw);max-height:90vh;overflow:auto;padding:18px}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 label{display:flex;flex-direction:column;gap:6px;color:var(--mu);font-size:14px;margin-bottom:12px}
 label.chk{flex-direction:row;align-items:flex-start;gap:10px;color:var(--tx)}
@@ -44,26 +71,28 @@ input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;bord
 .msg{color:var(--ac);font-weight:600;min-height:22px;font-size:14px}
 .mod{border-top:1px solid var(--ln);padding:12px 0}
 .mod video{width:100%;max-height:260px;background:#000}
-.mod .row{padding:8px 0}
+.row{display:flex;align-items:center;gap:12px;padding:8px 0}
+.meta{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 </style>
 </head>
 <body>
-<header>
-  <h1>KLIPATHON</h1>
-  <nav id="nav"></nav>
-</header>
-<main>
-  <div class="strip">Tryk på pilen for at stemme på dit favoritklip. Nye klip vises, når de er godkendt.</div>
+<div id="feed" tabindex="0" aria-label="Klip" aria-live="polite"></div>
+
+<div class="top">
+  <div class="bar">
+    <h1>KLIPATHON</h1>
+    <nav id="nav"></nav>
+  </div>
   <div id="tabs">
     <button id="t-top" class="on">Populære</button>
     <button id="t-new">Nyeste</button>
   </div>
-  <div id="feed" aria-live="polite"></div>
-</main>
-<footer>
+</div>
+
+<div class="bottom">
   Uofficiel fanside – ikke lavet af Rasmus Søndergaard eller Red Bull.
   <button id="infoBtn">Regler og privatliv</button>
-</footer>
+</div>
 
 <dialog id="up">
   <form id="upf">
@@ -106,7 +135,7 @@ const SB = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNicml3c2dueWx1eHV6eXBmc29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4NzExNTksImV4cCI6MjEwNzQ0NzE1OX0.0bCqcniIvO6Eh48PG08q3KlKbeCtxtPb0PBItNln__4'
 );
 const $ = s => document.querySelector(s);
-let user = null, isAdmin = false, tab = 'top', clips = [], myVotes = new Set();
+let user = null, isAdmin = false, tab = 'top', clips = [], myVotes = new Set(), muted = true, io = null;
 
 function h(tag, attrs, ...kids) {
   const e = document.createElement(tag);
@@ -118,31 +147,107 @@ function h(tag, attrs, ...kids) {
   kids.flat().forEach(c => e.append(c));
   return e;
 }
+const SVGNS = 'http://www.w3.org/2000/svg';
+function icon(path, extra) {
+  const s = document.createElementNS(SVGNS, 'svg');
+  s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true');
+  s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor');
+  s.setAttribute('stroke-width', '2'); s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round');
+  s.innerHTML = path + (extra || '');
+  return s;
+}
+const ICON = {
+  up: '<path d="M12 19V6M5.5 12.5 12 6l6.5 6.5"/>',
+  sound: '<path d="M4 9.5v5h4l5 4v-13l-5 4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
+  mute: '<path d="M4 9.5v5h4l5 4v-13l-5 4H4z"/><path d="M17 9.5l4.5 5M21.5 9.5 17 14.5"/>',
+  flag: '<path d="M6 21V4M6 5h11l-2 4 2 4H6"/>',
+  play: '<path d="M8 5l11 7-11 7z" fill="currentColor"/>'
+};
 const urlOf = p => SB.storage.from('clips').getPublicUrl(p).data.publicUrl;
 const login = () => SB.auth.signInWithOAuth({ provider: 'twitch', options: { redirectTo: location.href.split('#')[0].split('?')[0] } });
 
 function renderNav() {
   const n = $('#nav'); n.replaceChildren();
   if (!user) { n.append(h('button', { class: 'pri', onclick: login }, 'Log ind med Twitch')); return; }
-  n.append(h('button', { class: 'pri', onclick: () => $('#up').showModal() }, 'Upload klip'));
+  n.append(h('button', { class: 'pri', onclick: () => openDlg($('#up')) }, 'Upload'));
   if (isAdmin) n.append(h('button', { onclick: openMod }, 'Moderation'));
   n.append(h('button', { onclick: () => SB.auth.signOut() }, 'Log ud'));
 }
 
-function card(c) {
+/* Dialoger: pause klip mens de er åbne */
+function openDlg(d) { pauseAll(); d.showModal(); }
+document.querySelectorAll('dialog').forEach(d => d.addEventListener('close', () => { if (!document.querySelector('dialog[open]')) playActive(); }));
+
+/* Afspilning */
+let active = null;
+function allVideos() { return [...document.querySelectorAll('#feed video')]; }
+function pauseAll() { allVideos().forEach(v => v.pause()); }
+function syncMute() {
+  allVideos().forEach(v => v.muted = muted);
+  document.querySelectorAll('[data-sound]').forEach(b => {
+    b.setAttribute('aria-label', muted ? 'Slå lyd til' : 'Slå lyd fra');
+    const ic = b.querySelector('.ic'); ic.replaceChildren(icon(muted ? ICON.mute : ICON.sound));
+    b.classList.toggle('on', !muted);
+  });
+}
+function playVideo(v) {
+  v.muted = muted;
+  const p = v.play();
+  if (p && p.catch) p.catch(() => {
+    if (!muted) { muted = true; syncMute(); }
+    v.muted = true; v.play().catch(() => {});
+  });
+}
+function playActive() { if (active) playVideo(active.querySelector('video')); }
+function activate(slide) {
+  if (active === slide) { playVideo(slide.querySelector('video')); return; }
+  allVideos().forEach(v => { if (v.closest('.slide') !== slide) v.pause(); });
+  active = slide;
+  const v = slide.querySelector('video');
+  v.preload = 'auto'; playVideo(v);
+  const next = slide.nextElementSibling && slide.nextElementSibling.querySelector('video');
+  if (next) next.preload = 'auto';
+}
+function watch() {
+  if (io) io.disconnect();
+  io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      const v = e.target.querySelector('video');
+      if (e.isIntersecting && e.intersectionRatio >= 0.6) { if (!document.querySelector('dialog[open]')) activate(e.target); }
+      else if (!e.isIntersecting || e.intersectionRatio < 0.4) { v.pause(); if (active === e.target) active = null; }
+    });
+  }, { root: $('#feed'), threshold: [0, 0.4, 0.6, 1] });
+  document.querySelectorAll('.slide').forEach(s => io.observe(s));
+}
+
+function slide(c) {
   const voted = myVotes.has(c.id);
   const tag = c.handle ? h('span', { class: 'chip' }, (c.platform ? c.platform + ' ' : '') + c.handle) : '';
-  return h('article', { class: 'card' },
-    h('video', { src: urlOf(c.video_path), controls: '', preload: 'metadata', playsinline: '' }),
-    h('div', { class: 'row' },
-      h('div', { class: 'meta' }, h('b', {}, c.title), tag, h('button', { class: 'lnk', onclick: () => report(c) }, 'Meld klip')),
-      h('button', { class: 'vote' + (voted ? ' on' : ''), 'aria-label': 'Stem på ' + c.title, onclick: () => vote(c) }, '▲', h('br'), String(c.vote_count))));
+  const v = h('video', { src: urlOf(c.video_path) + '#t=0.1', preload: 'metadata', playsinline: '', 'webkit-playsinline': '', loop: '', disablepictureinpicture: '', disableremoteplayback: '', controlslist: 'nodownload noremoteplayback noplaybackrate', 'aria-label': c.title });
+  v.muted = muted;
+  const pp = h('div', { class: 'pp', 'aria-hidden': 'true' }, icon(ICON.play));
+  const bar = h('i');
+  v.addEventListener('loadedmetadata', () => { if (v.videoWidth > v.videoHeight) v.classList.add('land'); });
+  v.addEventListener('timeupdate', () => { if (v.duration) bar.style.transform = 'scaleX(' + (v.currentTime / v.duration) + ')'; });
+  v.addEventListener('play', () => pp.classList.remove('show'));
+  v.addEventListener('pause', () => { if (v === (active && active.querySelector('video'))) pp.classList.add('show'); });
+  v.addEventListener('click', () => { v.paused ? playVideo(v) : v.pause(); });
+  const sound = h('button', { class: 'small', 'data-sound': '', onclick: () => { muted = !muted; syncMute(); if (active) playVideo(active.querySelector('video')); } }, h('span', { class: 'ic' }));
+  const vote = h('button', { 'data-vote': c.id, class: voted ? 'on' : '', 'aria-label': 'Stem på ' + c.title, onclick: () => castVote(c) },
+    h('span', { class: 'ic' }, icon(ICON.up)), h('span', { class: 'n' }, String(c.vote_count)));
+  const rep = h('button', { class: 'small', 'aria-label': 'Meld klip', onclick: () => report(c) }, h('span', { class: 'ic' }, icon(ICON.flag)));
+  return h('section', { class: 'slide' },
+    h('div', { class: 'stage' }, v, h('div', { class: 'shade' }), pp,
+      h('div', { class: 'info' }, h('b', {}, c.title), tag),
+      h('div', { class: 'side' }, sound, vote, rep),
+      h('div', { class: 'prog' }, bar)));
 }
 
 function renderFeed() {
-  const f = $('#feed'); f.replaceChildren();
+  const f = $('#feed'); f.replaceChildren(); active = null;
   if (!clips.length) { f.append(h('div', { class: 'empty' }, 'Ingen klip endnu. Log ind, og upload det første.')); return; }
-  clips.forEach(c => f.append(card(c)));
+  clips.forEach(c => f.append(slide(c)));
+  syncMute(); watch(); f.scrollTop = 0; f.focus({ preventScroll: true });
 }
 
 async function loadClips() {
@@ -154,23 +259,31 @@ async function loadClips() {
   clips = data; renderFeed();
 }
 
-async function vote(c) {
+function paintVote(c) {
+  const b = document.querySelector('[data-vote="' + c.id + '"]');
+  if (!b) return;
+  b.classList.toggle('on', myVotes.has(c.id));
+  b.querySelector('.n').textContent = String(c.vote_count);
+}
+async function castVote(c) {
   if (!user) { login(); return; }
   const had = myVotes.has(c.id);
   had ? myVotes.delete(c.id) : myVotes.add(c.id);
-  c.vote_count += had ? -1 : 1; renderFeed();
+  c.vote_count += had ? -1 : 1; paintVote(c);
   const r = had ? await SB.from('votes').delete().eq('clip_id', c.id).eq('user_id', user.id)
                 : await SB.from('votes').insert({ clip_id: c.id });
   if (r.error) {
     had ? myVotes.add(c.id) : myVotes.delete(c.id);
-    c.vote_count += had ? 1 : -1; renderFeed();
+    c.vote_count += had ? 1 : -1; paintVote(c);
     alert('Din stemme blev ikke gemt. Prøv igen.');
   }
 }
 
 async function report(c) {
   if (!user) { login(); return; }
+  pauseAll();
   const reason = prompt('Hvorfor melder du dette klip? (valgfrit)');
+  playActive();
   if (reason === null) return;
   const { error } = await SB.from('reports').insert({ clip_id: c.id, reason: reason.slice(0, 300) || null });
   alert(error ? 'Anmeldelsen blev ikke sendt. Prøv igen.' : 'Tak. Vi kigger på klippet.');
@@ -203,13 +316,13 @@ $('#upf').addEventListener('submit', async e => {
 });
 
 async function openMod() {
-  $('#adm').showModal();
+  openDlg($('#adm'));
   const box = $('#pending'); box.replaceChildren(h('p', {}, 'Henter …'));
   const { data, error } = await SB.from('clips').select('*').eq('status', 'pending').order('created_at');
   if (error) { box.replaceChildren(h('p', {}, 'Kunne ikke hente klip.')); return; }
   if (!data.length) { box.replaceChildren(h('p', {}, 'Ingen klip afventer.')); return; }
   box.replaceChildren(...data.map(c => h('div', { class: 'mod' },
-    h('video', { src: urlOf(c.video_path), controls: '', preload: 'metadata', playsinline: '' }),
+    h('video', { src: urlOf(c.video_path) + '#t=0.1', controls: '', preload: 'metadata', playsinline: '' }),
     h('div', { class: 'row' },
       h('div', { class: 'meta' }, h('b', {}, c.title), c.handle ? h('span', { class: 'chip' }, c.handle) : ''),
       h('button', { class: 'pri', onclick: () => setStatus(c, 'approved') }, 'Godkend'),
@@ -239,15 +352,36 @@ async function afterAuth() {
   renderNav(); loadClips();
 }
 
-$('#t-top').onclick = () => { tab = 'top'; $('#t-top').className = 'on'; $('#t-new').className = ''; loadClips(); };
-$('#t-new').onclick = () => { tab = 'new'; $('#t-new').className = 'on'; $('#t-top').className = ''; loadClips(); };
+function setTab(t) {
+  tab = t;
+  $('#t-top').className = t === 'top' ? 'on' : '';
+  $('#t-new').className = t === 'new' ? 'on' : '';
+  loadClips();
+}
+$('#t-top').onclick = () => setTab('top');
+$('#t-new').onclick = () => setTab('new');
 $('#upx').onclick = () => $('#up').close();
 $('#admx').onclick = () => $('#adm').close();
-$('#infoBtn').onclick = () => $('#info').showModal();
+$('#infoBtn').onclick = () => openDlg($('#info'));
 $('#infox').onclick = () => $('#info').close();
 
-SB.auth.onAuthStateChange((_ev, s) => { user = s ? s.user : null; afterAuth(); });
-SB.auth.getSession().then(({ data }) => { user = data.session ? data.session.user : null; afterAuth(); });
+document.addEventListener('keydown', e => {
+  if (document.querySelector('dialog[open]') || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const f = $('#feed');
+  if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); f.scrollBy({ top: f.clientHeight }); }
+  if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); f.scrollBy({ top: -f.clientHeight }); }
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) pauseAll(); else if (!document.querySelector('dialog[open]')) playActive(); });
+
+/* Kør kun opsætningen igen, når brugeren faktisk skifter (ellers nulstilles scrollen) */
+let booted = false, uid = null;
+function setUser(s) {
+  const id = s ? s.user.id : null;
+  user = s ? s.user : null;
+  if (!booted || id !== uid) { booted = true; uid = id; afterAuth(); }
+}
+SB.auth.onAuthStateChange((_ev, s) => setUser(s));
+SB.auth.getSession().then(({ data }) => setUser(data.session));
 </script>
 </body>
 </html>
