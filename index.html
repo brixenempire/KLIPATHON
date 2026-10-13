@@ -694,8 +694,9 @@ async function afterAuth() {
   isAdmin = false; me = null; myVotes = new Set();
   if (user) {
     const m = user.user_metadata || {};
-    const name = m.preferred_username || m.name, av = m.avatar_url || m.picture;
-    if (name) await SB.from('profiles').update({ username: String(name).slice(0, 60), avatar_url: av ? String(av).slice(0, 500) : null }).eq('id', user.id);
+    const av = m.avatar_url || m.picture;
+    /* Kun profilbilledet synkroniseres fra Twitch – visningsnavnet kan ændres i databasen */
+    if (av) await SB.from('profiles').update({ avatar_url: String(av).slice(0, 500) }).eq('id', user.id);
     const [a, v, p] = await Promise.all([
       SB.from('admins').select('user_id').maybeSingle(),
       SB.from('votes').select('clip_id'),
