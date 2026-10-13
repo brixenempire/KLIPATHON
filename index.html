@@ -31,7 +31,12 @@ a{color:inherit}
 .left,.right{padding:22px 18px;overflow-y:auto;scrollbar-width:thin}
 .left{display:flex;flex-direction:column;gap:6px;border-right:1px solid var(--ln)}
 .right{border-left:1px solid var(--ln)}
-.main{position:relative;min-width:0;background:var(--soft)}
+.main{position:relative;min-width:0;background:#f5f0fd;isolation:isolate}
+.main::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(154,90,246,.38) 2.4px,transparent 2.9px),radial-gradient(circle,rgba(154,90,246,.2) 1.5px,transparent 2px);
+  background-size:24px 24px,24px 24px;background-position:0 0,12px 12px;
+  -webkit-mask-image:radial-gradient(130% 100% at 100% 0%,#000 0%,rgba(0,0,0,.35) 55%,rgba(0,0,0,.12) 100%);
+  mask-image:radial-gradient(130% 100% at 100% 0%,#000 0%,rgba(0,0,0,.35) 55%,rgba(0,0,0,.12) 100%)}
 
 .logo{font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:34px;line-height:1;letter-spacing:.02em;color:var(--ac);margin:2px 8px 4px}
 .sub{font-size:12px;color:var(--mu);margin:0 8px 16px}
@@ -112,6 +117,21 @@ a.chip:hover{background:#e5d6fb}
 .gi .gv{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 6px;color:#fff;font-size:13px;font-weight:700;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.6))}
 .gi .st{position:absolute;left:6px;top:6px;background:#fff;color:var(--tx);font-size:11px;font-weight:700;border-radius:10px;padding:2px 8px}
 
+/* Nyeste: kortoversigt */
+.wide{max-width:1000px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px 14px;margin-top:20px}
+.card{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;min-height:0;padding:0;border:0;border-radius:12px;background:none;text-align:left;font-weight:400}
+.ct{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:#000}
+.ct video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.ct .gv{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 6px;color:#fff;font-size:13px;font-weight:700;background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.card:hover .ct{box-shadow:0 0 0 3px var(--ac2)}
+.ctt{font-weight:600;font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.cp{display:flex;align-items:center;gap:6px;color:var(--mu);font-size:13px;min-width:0}
+.cp span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.more{display:flex;margin:24px auto 0}
+.back{position:absolute;left:12px;top:12px;z-index:3;min-height:40px;padding:0 16px;background:#fff;font-size:14px;box-shadow:0 2px 10px rgba(20,10,40,.12)}
+.back[hidden]{display:none}
+
 /* Dialoger */
 dialog{background:#fff;color:var(--tx);border:2px solid var(--tx);border-radius:14px;width:min(520px,94vw);max-height:90vh;overflow:auto;padding:18px}
 dialog::backdrop{background:rgba(20,10,40,.6)}
@@ -140,7 +160,7 @@ input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;bord
   html,body{overflow:hidden}
   .app{display:block;height:100%;border:0}
   .left,.right{display:none}
-  .main{position:fixed;left:0;right:0;top:calc(52px + env(safe-area-inset-top));bottom:calc(58px + env(safe-area-inset-bottom))}
+  .main{z-index:6;position:fixed;left:0;right:0;top:calc(52px + env(safe-area-inset-top));bottom:calc(58px + env(safe-area-inset-bottom))}
   .mtop{display:flex;position:fixed;top:0;left:0;right:0;height:calc(52px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--ln);z-index:5}
   .mtop .logo{font-size:26px;margin:0}
   .mtop small{display:block;font-size:10px;color:var(--mu);line-height:1.1;margin-top:2px}
@@ -151,6 +171,9 @@ input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;bord
   .mbar button{flex-direction:column;gap:2px;min-height:58px;border:0;border-radius:0;font-size:11px;color:var(--mu);padding:0}
   .mbar button.on{color:var(--ac)}
   .mbar .plus .c{width:44px;height:36px;border-radius:18px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center}
+  .back{position:fixed;left:12px;top:calc(7px + env(safe-area-inset-top));z-index:6}
+  .nf .mtop>div:first-child{visibility:hidden}
+  .cards{grid-template-columns:repeat(2,1fr);gap:16px 10px}
   .slide{padding:6px 8px}
   .post{width:100%}
   .profile{padding:18px 12px 30px}
@@ -173,6 +196,7 @@ input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;bord
   <main class="main">
     <div id="feed" tabindex="0" aria-label="Klip"></div>
     <div id="prof" hidden></div>
+    <button class="back" id="back" hidden>← Alle nyeste</button>
   </main>
 
   <aside class="right" aria-label="Lister">
@@ -235,7 +259,7 @@ const SB = supabase.createClient(
 );
 const $ = s => document.querySelector(s);
 let user = null, me = null, isAdmin = false, view = 'top', profId = null;
-let side = null, clips = [], myVotes = new Set(), muted = true, io = null, loadSeq = 0, active = null;
+let newClips = [], newDone = false, gridScroll = 0, side = null, clips = [], myVotes = new Set(), muted = true, io = null, loadSeq = 0, active = null;
 const reg = new Map(); // delte klip-objekter, så stemmetal er ens overalt
 function keep(c) { const o = reg.get(c.id); if (o) { Object.assign(o, c); return o; } reg.set(c.id, c); return c; }
 
@@ -302,7 +326,9 @@ function socialChip(platform, handle) {
 
 /* Menuer */
 function setActiveNav() {
-  const key = view === 'profile' ? (user && profId === user.id ? 'me' : '') : view;
+  const key = view === 'profile' ? (user && profId === user.id ? 'me' : '') : view === 'newfeed' ? 'new' : view;
+  document.body.classList.toggle('nf', view === 'newfeed');
+  $('#back').hidden = view !== 'newfeed';
   document.querySelectorAll('[data-nav]').forEach(b => b.classList.toggle('on', b.dataset.nav === key));
 }
 const goMe = () => { if (!user) login(); else openProfile(user.id); };
@@ -418,21 +444,69 @@ function renderFeed() {
 async function loadClips() {
   const seq = ++loadSeq;
   let q = SB.from('clips').select('*, profiles(username,avatar_url)').eq('status', 'approved');
-  q = view === 'top' ? q.order('vote_count', { ascending: false }).order('created_at', { ascending: false })
-                     : q.order('created_at', { ascending: false });
+  q = q.order('vote_count', { ascending: false }).order('created_at', { ascending: false });
   const { data, error } = await q.limit(50);
-  if (seq !== loadSeq || view === 'profile' || view === 'lists') return;
+  if (seq !== loadSeq || view !== 'top') return;
   if (error) { $('#feed').replaceChildren(h('div', { class: 'empty' }, 'Kunne ikke hente klip. Prøv igen om lidt.')); return; }
   clips = data.map(keep); renderFeed();
 }
 function setView(v) {
   view = v; profId = null;
-  $('#prof').hidden = true; $('#feed').hidden = false;
   setActiveNav();
+  if (v === 'new') return loadNew();
+  $('#prof').hidden = true; $('#feed').hidden = false;
   return loadClips();
 }
+const PAGE = 30;
+async function loadNew(more) {
+  const seq = ++loadSeq, box = $('#prof');
+  $('#feed').hidden = true; box.hidden = false; pauseAll(); active = null;
+  if (!more) { newClips = []; newDone = false; box.scrollTop = 0; box.replaceChildren(h('div', { class: 'empty' }, 'Henter klip …')); }
+  const from = newClips.length;
+  const { data, error } = await SB.from('clips').select('*, profiles(username,avatar_url)').eq('status', 'approved')
+    .order('created_at', { ascending: false }).range(from, from + PAGE - 1);
+  if (seq !== loadSeq || view !== 'new') return;
+  if (error) { box.replaceChildren(h('div', { class: 'empty' }, 'Kunne ikke hente klip. Prøv igen om lidt.')); return; }
+  newClips.push(...data.map(keep)); newDone = data.length < PAGE;
+  renderGrid();
+}
+function renderGrid() {
+  const box = $('#prof'), top = box.scrollTop;
+  const body = newClips.length
+    ? h('div', { class: 'cards' }, ...newClips.map(c => {
+        const th = h('video', { src: urlOf(c.video_path) + '#t=0.1', preload: 'metadata', playsinline: '', tabindex: '-1' }); th.muted = true;
+        const p = c.profiles || {};
+        return h('button', { class: 'card', 'aria-label': c.title, onclick: () => openNewFeed(c.id) },
+          h('span', { class: 'ct' }, th, h('span', { class: 'gv' }, '▲ ' + c.vote_count)),
+          h('span', { class: 'ctt' }, c.title),
+          h('span', { class: 'cp' }, avatar(p, 22), h('span', {}, p.username || 'Fan')));
+      }))
+    : h('p', { class: 'muted', style: 'margin-top:24px' }, 'Ingen klip endnu.');
+  box.replaceChildren(h('div', { class: 'profile wide' },
+    h('h2', {}, 'Nyeste klip'), h('p', { class: 'muted', style: 'margin-top:6px' }, 'Tryk på et klip for at se det og scrolle videre.'),
+    body, newClips.length && !newDone ? h('button', { class: 'more', onclick: () => loadNew(true) }, 'Vis flere') : ''));
+  box.scrollTop = top;
+}
+function openNewFeed(id) {
+  gridScroll = $('#prof').scrollTop;
+  view = 'newfeed'; clips = newClips.slice();
+  $('#prof').hidden = true; $('#feed').hidden = false;
+  setActiveNav(); renderFeed();
+  const s = document.querySelector('.slide[data-id="' + id + '"]');
+  if (s) s.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+function backToGrid() {
+  view = 'new'; pauseAll(); active = null;
+  $('#feed').hidden = true; $('#prof').hidden = false; setActiveNav();
+  renderGrid(); $('#prof').scrollTop = gridScroll;
+}
+$('#back').onclick = backToGrid;
+function refreshView() {
+  if (view === 'top') loadClips();
+  else if (view === 'new' || view === 'newfeed') { view = 'new'; setActiveNav(); loadNew(); }
+}
 async function showClip(id) {
-  if (view === 'profile' || view === 'lists') await setView('top');
+  if (view !== 'top') await setView('top');
   let s = document.querySelector('.slide[data-id="' + id + '"]');
   if (!s) { await setView('top'); s = document.querySelector('.slide[data-id="' + id + '"]'); }
   if (s) s.scrollIntoView({ block: 'start' });
@@ -476,7 +550,7 @@ async function deleteClip(c) {
   await SB.storage.from('clips').remove([c.video_path]);
   reg.delete(c.id);
   if ($('#pv').open) $('#pv').close();
-  if (view === 'profile') openProfile(profId); else if (view === 'top' || view === 'new') loadClips();
+  if (view === 'profile') openProfile(profId); else if (view !== 'lists') refreshView();
   loadSide();
 }
 
@@ -607,7 +681,7 @@ async function openMod() {
 async function setStatus(c, status) {
   const { error } = await SB.from('clips').update({ status }).eq('id', c.id);
   if (error) { alert('Kunne ikke opdatere: ' + error.message); return; }
-  openMod(); if (view === 'top' || view === 'new') loadClips(); loadSide();
+  openMod(); if (view !== 'profile' && view !== 'lists') refreshView(); loadSide();
 }
 
 function prefill() {
@@ -633,7 +707,7 @@ async function afterAuth() {
   }
   renderNav();
   if (view === 'profile' && !user) view = 'top';
-  if (view === 'profile') openProfile(profId); else if (view === 'lists') openLists(); else { $('#prof').hidden = true; $('#feed').hidden = false; loadClips(); }
+  if (view === 'profile') openProfile(profId); else if (view === 'lists') openLists(); else if (view === 'new' || view === 'newfeed') { view = 'new'; setActiveNav(); loadNew(); } else { $('#prof').hidden = true; $('#feed').hidden = false; loadClips(); }
   loadSide();
 }
 
