@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klipathon – fanside</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--card:#f3f3f5;--tx:#121214;--mu:#595961;--ac:#7a3fe0;--ac2:#9a5af6;--ln:#d6d6dc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 Poppins,'Helvetica Neue',Arial,sans-serif}
+header,main,footer{max-width:560px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+h1,h2,.ttl{font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em}
+h1{margin:0;font-size:32px;line-height:1}
+h2{font-size:28px;line-height:1.1}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+button,select,input{font:inherit}
+button{min-height:44px;padding:0 18px;border-radius:22px;border:2px solid var(--tx);background:transparent;color:var(--tx);cursor:pointer;font-weight:600}
+button.pri,button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:focus-visible,input:focus-visible,select:focus-visible,video:focus-visible{outline:3px solid var(--ac2);outline-offset:2px}
+.strip{background:linear-gradient(90deg,#9a5af6,#6d3ad6);color:#fff;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:600;margin-bottom:12px}
+#tabs{display:flex;gap:8px;margin-bottom:12px}
+.card{background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.card video{display:block;width:100%;max-height:70vh;background:#000}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.meta{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.meta b{font-weight:700}
+.chip{font-size:12px;font-weight:600;color:#fff;background:var(--tx);border-radius:20px;padding:3px 10px}
+.lnk{min-height:32px;padding:0;border:0;color:var(--mu);font-size:13px;font-weight:400;text-decoration:underline}
+.vote{min-width:64px;min-height:56px;border-radius:12px;border:0;background:var(--tx);color:#fff;font-weight:700;line-height:1.2}
+.vote.on{background:var(--ac);color:#fff}
+.empty{color:var(--mu);text-align:center;padding:32px 0}
+footer{font-size:12px;color:var(--mu);text-align:center}
+footer button{min-height:32px;border:0;color:var(--mu);text-decoration:underline;padding:0 6px;font-weight:400}
+dialog{background:#fff;color:var(--tx);border:2px solid var(--tx);border-radius:14px;width:min(520px,94vw);padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+label{display:flex;flex-direction:column;gap:6px;color:var(--mu);font-size:14px;margin-bottom:12px}
+label.chk{flex-direction:row;align-items:flex-start;gap:10px;color:var(--tx)}
+label.chk input{width:22px;height:22px;margin:0;flex:none}
+input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;border:1px solid var(--ln);background:#fff;color:var(--tx);padding:10px 12px;font-size:16px}
+.msg{color:var(--ac);font-weight:600;min-height:22px;font-size:14px}
+.mod{border-top:1px solid var(--ln);padding:12px 0}
+.mod video{width:100%;max-height:260px;background:#000}
+.mod .row{padding:8px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>KLIPATHON</h1>
+  <nav id="nav"></nav>
+</header>
+<main>
+  <div class="strip">Tryk på pilen for at stemme på dit favoritklip. Nye klip vises, når de er godkendt.</div>
+  <div id="tabs">
+    <button id="t-top" class="on">Populære</button>
+    <button id="t-new">Nyeste</button>
+  </div>
+  <div id="feed" aria-live="polite"></div>
+</main>
+<footer>
+  Uofficiel fanside – ikke lavet af Rasmus Søndergaard eller Red Bull.
+  <button id="infoBtn">Regler og privatliv</button>
+</footer>
+
+<dialog id="up">
+  <form id="upf">
+    <h2 style="margin-top:0">Upload dit klip</h2>
+    <label>Videofil (mp4, mov eller webm, højst 60 sek. og 50 MB)
+      <input id="file" type="file" accept="video/mp4,video/quicktime,video/webm" required></label>
+    <label>Titel
+      <input id="ti" type="text" maxlength="80" required></label>
+    <label>Din platform (valgfri)
+      <select id="pl"><option value="">Ingen</option><option value="twitch">Twitch</option><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="youtube">YouTube</option></select></label>
+    <label>Brugernavn (valgfri)
+      <input id="ha" type="text" maxlength="40"></label>
+    <label class="chk"><input id="rt" type="checkbox" required><span>Jeg har selv lavet klippet eller har ret til at dele det.</span></label>
+    <p class="msg" id="upmsg" role="status"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button type="button" id="upx">Luk</button>
+      <button type="submit" class="pri">Send til godkendelse</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="adm">
+  <h2 style="margin-top:0">Klip der afventer</h2>
+  <div id="pending"></div>
+  <div style="text-align:right;margin-top:12px"><button id="admx">Luk</button></div>
+</dialog>
+
+<dialog id="info">
+  <h2 style="margin-top:0">Regler og privatliv</h2>
+  <p>Klipathon er en uofficiel fanside. Den er ikke lavet af, støttet af eller forbundet med Rasmus Søndergaard eller Red Bull.</p>
+  <p>Alle klip bliver tjekket, før de vises. Upload kun klip, du selv har lavet, eller har ret til at dele. Klip kan fjernes på forespørgsel.</p>
+  <p>Når du logger ind med Twitch, gemmer vi dit Twitch-navn og din e-mail samt de klip og stemmer, du sender. Skriv til KLIPATHON på TikTok, hvis du vil have dem slettet.</p>
+  <div style="text-align:right"><button id="infox">Luk</button></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SB = supabase.createClient(
+  'https://sbriwsgnyluxuzypfsob.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNicml3c2dueWx1eHV6eXBmc29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4NzExNTksImV4cCI6MjEwNzQ0NzE1OX0.0bCqcniIvO6Eh48PG08q3KlKbeCtxtPb0PBItNln__4'
+);
+const $ = s => document.querySelector(s);
+let user = null, isAdmin = false, tab = 'top', clips = [], myVotes = new Set();
+
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === 'class') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => e.append(c));
+  return e;
+}
+const urlOf = p => SB.storage.from('clips').getPublicUrl(p).data.publicUrl;
+const login = () => SB.auth.signInWithOAuth({ provider: 'twitch', options: { redirectTo: location.href.split('#')[0].split('?')[0] } });
+
+function renderNav() {
+  const n = $('#nav'); n.replaceChildren();
+  if (!user) { n.append(h('button', { class: 'pri', onclick: login }, 'Log ind med Twitch')); return; }
+  n.append(h('button', { class: 'pri', onclick: () => $('#up').showModal() }, 'Upload klip'));
+  if (isAdmin) n.append(h('button', { onclick: openMod }, 'Moderation'));
+  n.append(h('button', { onclick: () => SB.auth.signOut() }, 'Log ud'));
+}
+
+function card(c) {
+  const voted = myVotes.has(c.id);
+  const tag = c.handle ? h('span', { class: 'chip' }, (c.platform ? c.platform + ' ' : '') + c.handle) : '';
+  return h('article', { class: 'card' },
+    h('video', { src: urlOf(c.video_path), controls: '', preload: 'metadata', playsinline: '' }),
+    h('div', { class: 'row' },
+      h('div', { class: 'meta' }, h('b', {}, c.title), tag, h('button', { class: 'lnk', onclick: () => report(c) }, 'Meld klip')),
+      h('button', { class: 'vote' + (voted ? ' on' : ''), 'aria-label': 'Stem på ' + c.title, onclick: () => vote(c) }, '▲', h('br'), String(c.vote_count))));
+}
+
+function renderFeed() {
+  const f = $('#feed'); f.replaceChildren();
+  if (!clips.length) { f.append(h('div', { class: 'empty' }, 'Ingen klip endnu. Log ind, og upload det første.')); return; }
+  clips.forEach(c => f.append(card(c)));
+}
+
+async function loadClips() {
+  let q = SB.from('clips').select('*').eq('status', 'approved');
+  q = tab === 'top' ? q.order('vote_count', { ascending: false }).order('created_at', { ascending: false })
+                    : q.order('created_at', { ascending: false });
+  const { data, error } = await q.limit(50);
+  if (error) { $('#feed').replaceChildren(h('div', { class: 'empty' }, 'Kunne ikke hente klip. Prøv igen om lidt.')); return; }
+  clips = data; renderFeed();
+}
+
+async function vote(c) {
+  if (!user) { login(); return; }
+  const had = myVotes.has(c.id);
+  had ? myVotes.delete(c.id) : myVotes.add(c.id);
+  c.vote_count += had ? -1 : 1; renderFeed();
+  const r = had ? await SB.from('votes').delete().eq('clip_id', c.id).eq('user_id', user.id)
+                : await SB.from('votes').insert({ clip_id: c.id });
+  if (r.error) {
+    had ? myVotes.add(c.id) : myVotes.delete(c.id);
+    c.vote_count += had ? 1 : -1; renderFeed();
+    alert('Din stemme blev ikke gemt. Prøv igen.');
+  }
+}
+
+async function report(c) {
+  if (!user) { login(); return; }
+  const reason = prompt('Hvorfor melder du dette klip? (valgfrit)');
+  if (reason === null) return;
+  const { error } = await SB.from('reports').insert({ clip_id: c.id, reason: reason.slice(0, 300) || null });
+  alert(error ? 'Anmeldelsen blev ikke sendt. Prøv igen.' : 'Tak. Vi kigger på klippet.');
+}
+
+$('#upf').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = $('#upmsg'), f = $('#file').files[0];
+  if (!f) return;
+  if (f.size > 50 * 1024 * 1024) { msg.textContent = 'Filen er over 50 MB. Vælg et kortere klip.'; return; }
+  const dur = await new Promise(r => {
+    const v = document.createElement('video'); v.preload = 'metadata';
+    v.onloadedmetadata = () => r(v.duration); v.onerror = () => r(0);
+    v.src = URL.createObjectURL(f);
+  });
+  if (dur > 61) { msg.textContent = 'Klippet må højst være 60 sekunder.'; return; }
+  msg.textContent = 'Uploader …';
+  const ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+  const path = user.id + '/' + crypto.randomUUID() + '.' + ext;
+  let r = await SB.storage.from('clips').upload(path, f, { contentType: f.type || 'video/mp4' });
+  if (r.error) { msg.textContent = 'Upload fejlede: ' + r.error.message; return; }
+  r = await SB.from('clips').insert({
+    title: $('#ti').value.trim(), video_path: path,
+    platform: $('#pl').value || null, handle: $('#ha').value.trim() || null, rights_confirmed: true
+  });
+  if (r.error) { msg.textContent = 'Klippet blev ikke gemt: ' + r.error.message; return; }
+  msg.textContent = 'Tak! Dit klip afventer godkendelse.';
+  $('#upf').reset(); prefill();
+  setTimeout(() => { $('#up').close(); msg.textContent = ''; }, 2200);
+});
+
+async function openMod() {
+  $('#adm').showModal();
+  const box = $('#pending'); box.replaceChildren(h('p', {}, 'Henter …'));
+  const { data, error } = await SB.from('clips').select('*').eq('status', 'pending').order('created_at');
+  if (error) { box.replaceChildren(h('p', {}, 'Kunne ikke hente klip.')); return; }
+  if (!data.length) { box.replaceChildren(h('p', {}, 'Ingen klip afventer.')); return; }
+  box.replaceChildren(...data.map(c => h('div', { class: 'mod' },
+    h('video', { src: urlOf(c.video_path), controls: '', preload: 'metadata', playsinline: '' }),
+    h('div', { class: 'row' },
+      h('div', { class: 'meta' }, h('b', {}, c.title), c.handle ? h('span', { class: 'chip' }, c.handle) : ''),
+      h('button', { class: 'pri', onclick: () => setStatus(c, 'approved') }, 'Godkend'),
+      h('button', { onclick: () => setStatus(c, 'rejected') }, 'Afvis')))));
+}
+async function setStatus(c, status) {
+  const { error } = await SB.from('clips').update({ status }).eq('id', c.id);
+  if (error) { alert('Kunne ikke opdatere: ' + error.message); return; }
+  openMod(); loadClips();
+}
+
+function prefill() {
+  const m = (user && user.user_metadata) || {};
+  const n = m.preferred_username || m.name || '';
+  if (n) { $('#pl').value = 'twitch'; $('#ha').value = n; }
+}
+
+async function afterAuth() {
+  isAdmin = false; myVotes = new Set();
+  if (user) {
+    const a = await SB.from('admins').select('user_id').maybeSingle();
+    isAdmin = !!a.data;
+    const v = await SB.from('votes').select('clip_id');
+    if (v.data) myVotes = new Set(v.data.map(x => x.clip_id));
+    prefill();
+  }
+  renderNav(); loadClips();
+}
+
+$('#t-top').onclick = () => { tab = 'top'; $('#t-top').className = 'on'; $('#t-new').className = ''; loadClips(); };
+$('#t-new').onclick = () => { tab = 'new'; $('#t-new').className = 'on'; $('#t-top').className = ''; loadClips(); };
+$('#upx').onclick = () => $('#up').close();
+$('#admx').onclick = () => $('#adm').close();
+$('#infoBtn').onclick = () => $('#info').showModal();
+$('#infox').onclick = () => $('#info').close();
+
+SB.auth.onAuthStateChange((_ev, s) => { user = s ? s.user : null; afterAuth(); });
+SB.auth.getSession().then(({ data }) => { user = data.session ? data.session.user : null; afterAuth(); });
+</script>
+</body>
+</html>
