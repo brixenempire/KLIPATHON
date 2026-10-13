@@ -147,7 +147,7 @@ input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;bord
   .mtop .r{display:flex;gap:6px;align-items:center}
   .mtop button{min-height:38px;padding:0 14px;font-size:14px}
   .mtop .ibtn{min-width:38px;padding:0}
-  .mbar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--ln);z-index:5}
+  .mbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--ln);z-index:5}
   .mbar button{flex-direction:column;gap:2px;min-height:58px;border:0;border-radius:0;font-size:11px;color:var(--mu);padding:0}
   .mbar button.on{color:var(--ac)}
   .mbar .plus .c{width:44px;height:36px;border-radius:18px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center}
@@ -176,8 +176,8 @@ input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;bord
   </main>
 
   <aside class="right" aria-label="Lister">
-    <section class="box"><h3>Top 5 klip</h3><div id="top5"><p class="muted">Henter …</p></div></section>
-    <section class="box"><h3>Mest likede profiler</h3><div id="topc"><p class="muted">Henter …</p></div></section>
+    <section class="box"><h3>Top 5 klip</h3><div class="js-top5"><p class="muted">Henter …</p></div></section>
+    <section class="box"><h3>Mest likede profiler</h3><div class="js-topc"><p class="muted">Henter …</p></div></section>
     <section class="box"><h3>Om siden</h3><p class="muted">Klipathon er lavet af fans, for fans. Upload dit bedste øjeblik, stem på dine favoritter, og tag din egen profil, så andre kan finde dig.</p></section>
   </aside>
 </div>
@@ -191,7 +191,7 @@ input[type=text],select,input[type=file]{min-height:48px;border-radius:10px;bord
 <dialog id="up">
   <form id="upf">
     <h2 style="margin-top:0">Upload dit klip</h2>
-    <label>Videofil (mp4, mov eller webm, højst 60 sek. og 50 MB)
+    <label>Videofil (mp4, mov eller webm, højst 45 sek. og 25 MB)
       <input id="file" type="file" accept="video/mp4,video/quicktime,video/webm" required></label>
     <label>Titel
       <input id="ti" type="text" maxlength="80" required></label>
@@ -235,7 +235,7 @@ const SB = supabase.createClient(
 );
 const $ = s => document.querySelector(s);
 let user = null, me = null, isAdmin = false, view = 'top', profId = null;
-let clips = [], myVotes = new Set(), muted = true, io = null, loadSeq = 0, active = null;
+let side = null, clips = [], myVotes = new Set(), muted = true, io = null, loadSeq = 0, active = null;
 const reg = new Map(); // delte klip-objekter, så stemmetal er ens overalt
 function keep(c) { const o = reg.get(c.id); if (o) { Object.assign(o, c); return o; } reg.set(c.id, c); return c; }
 
@@ -269,6 +269,8 @@ const ICON = {
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+  trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/>',
   shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>'
 };
 const urlOf = p => SB.storage.from('clips').getPublicUrl(p).data.publicUrl;
@@ -324,6 +326,7 @@ function renderNav() {
     h('button', { 'data-nav': 'top', onclick: items[0][3] }, icon(ICON.flame), 'Populære'),
     h('button', { 'data-nav': 'new', onclick: items[1][3] }, icon(ICON.clock), 'Nyeste'),
     h('button', { class: 'plus', onclick: goUpload, 'aria-label': 'Upload klip' }, h('span', { class: 'c' }, icon(ICON.plus)), 'Upload'),
+    h('button', { 'data-nav': 'lists', onclick: openLists }, icon(ICON.trophy), 'Top'),
     h('button', { 'data-nav': 'me', onclick: goMe }, icon(ICON.user), 'Profil'));
   $('#mtopR').replaceChildren(
     h('button', { class: 'ibtn', 'aria-label': 'Regler og privatliv', onclick: () => openDlg($('#info')) }, icon(ICON.info)),
@@ -392,7 +395,9 @@ function postEl(c) {
   const sound = h('button', { class: 'ibtn', 'data-sound': '', onclick: () => { muted = !muted; syncMute(); const a = active && active.querySelector('video'); if (a && !a.paused) playVideo(a); } });
   const vote = h('button', { class: 'vote' + (voted ? ' on' : ''), 'data-vote': c.id, 'aria-label': 'Stem på ' + c.title, onclick: () => castVote(c) },
     icon(ICON.up), h('span', {}, 'Stem'), h('span', { class: 'n' }, String(c.vote_count)));
-  const rep = h('button', { class: 'ibtn end', 'aria-label': 'Meld klip', onclick: () => report(c) }, icon(ICON.flag));
+  const own = !!user && c.user_id === user.id;
+  const rep = own ? h('button', { class: 'ibtn end', 'aria-label': 'Slet dit klip', title: 'Slet dit klip', onclick: () => deleteClip(c) }, icon(ICON.trash))
+                  : h('button', { class: 'ibtn end', 'aria-label': 'Meld klip', onclick: () => report(c) }, icon(ICON.flag));
   return h('article', { class: 'post' },
     h('div', { class: 'head' },
       h('button', { class: 'plain who', onclick: () => { if ($('#pv').open) $('#pv').close(); openProfile(c.user_id); } }, avatar(prof, 36), h('span', { class: 'nm' }, prof.username || 'Fan')),
@@ -416,7 +421,7 @@ async function loadClips() {
   q = view === 'top' ? q.order('vote_count', { ascending: false }).order('created_at', { ascending: false })
                      : q.order('created_at', { ascending: false });
   const { data, error } = await q.limit(50);
-  if (seq !== loadSeq || view === 'profile') return;
+  if (seq !== loadSeq || view === 'profile' || view === 'lists') return;
   if (error) { $('#feed').replaceChildren(h('div', { class: 'empty' }, 'Kunne ikke hente klip. Prøv igen om lidt.')); return; }
   clips = data.map(keep); renderFeed();
 }
@@ -427,7 +432,7 @@ function setView(v) {
   return loadClips();
 }
 async function showClip(id) {
-  if (view === 'profile') await setView('top');
+  if (view === 'profile' || view === 'lists') await setView('top');
   let s = document.querySelector('.slide[data-id="' + id + '"]');
   if (!s) { await setView('top'); s = document.querySelector('.slide[data-id="' + id + '"]'); }
   if (s) s.scrollIntoView({ block: 'start' });
@@ -463,6 +468,18 @@ async function report(c) {
   alert(error ? 'Anmeldelsen blev ikke sendt. Prøv igen.' : 'Tak. Vi kigger på klippet.');
 }
 
+async function deleteClip(c) {
+  pauseAll();
+  if (!confirm('Vil du slette dit klip "' + c.title + '"? Det kan ikke fortrydes.')) { playActive(); return; }
+  const r = await SB.from('clips').delete().eq('id', c.id);
+  if (r.error) { alert('Klippet blev ikke slettet. Prøv igen.'); playActive(); return; }
+  await SB.storage.from('clips').remove([c.video_path]);
+  reg.delete(c.id);
+  if ($('#pv').open) $('#pv').close();
+  if (view === 'profile') openProfile(profId); else if (view === 'top' || view === 'new') loadClips();
+  loadSide();
+}
+
 /* Sidebar: top 5 og profiler */
 async function loadSide() {
   const [t, c] = await Promise.all([
@@ -470,20 +487,38 @@ async function loadSide() {
       .order('vote_count', { ascending: false }).order('created_at', { ascending: false }).limit(5),
     SB.from('creator_stats').select('*').order('total_votes', { ascending: false }).order('clip_count', { ascending: false }).limit(5)
   ]);
-  const tb = $('#top5'), cb = $('#topc');
-  if (t.error || !t.data || !t.data.length) tb.replaceChildren(h('p', { class: 'muted' }, 'Ingen klip endnu.'));
-  else tb.replaceChildren(...t.data.map((x, i) => {
-    const th = h('video', { class: 'th', src: urlOf(x.video_path) + '#t=0.1', preload: 'metadata', playsinline: '', tabindex: '-1' }); th.muted = true;
-    return h('button', { class: 'li', onclick: () => showClip(x.id) },
-      h('span', { class: 'rk' }, String(i + 1)), th,
-      h('span', { class: 'tx' }, h('b', {}, x.title), h('small', {}, (x.profiles && x.profiles.username) || 'Fan')),
-      h('span', { class: 'vt' }, '▲ ' + x.vote_count));
-  }));
-  if (c.error || !c.data || !c.data.length) cb.replaceChildren(h('p', { class: 'muted' }, 'Ingen profiler endnu.'));
-  else cb.replaceChildren(...c.data.map((x, i) => h('button', { class: 'li', onclick: () => openProfile(x.user_id) },
-    h('span', { class: 'rk' }, String(i + 1)), avatar(x, 36),
-    h('span', { class: 'tx' }, h('b', {}, x.username), h('small', {}, x.clip_count + (x.clip_count === 1 ? ' klip' : ' klip'))),
-    h('span', { class: 'vt' }, '▲ ' + x.total_votes))));
+  side = [t, c]; renderSide();
+}
+function renderSide() {
+  if (!side) return;
+  const [t, c] = side;
+  document.querySelectorAll('.js-top5').forEach(tb => {
+    if (t.error || !t.data || !t.data.length) tb.replaceChildren(h('p', { class: 'muted' }, 'Ingen klip endnu.'));
+    else tb.replaceChildren(...t.data.map((x, i) => {
+      const th = h('video', { class: 'th', src: urlOf(x.video_path) + '#t=0.1', preload: 'metadata', playsinline: '', tabindex: '-1' }); th.muted = true;
+      return h('button', { class: 'li', onclick: () => showClip(x.id) },
+        h('span', { class: 'rk' }, String(i + 1)), th,
+        h('span', { class: 'tx' }, h('b', {}, x.title), h('small', {}, (x.profiles && x.profiles.username) || 'Fan')),
+        h('span', { class: 'vt' }, '▲ ' + x.vote_count));
+    }));
+  });
+  document.querySelectorAll('.js-topc').forEach(cb => {
+    if (c.error || !c.data || !c.data.length) cb.replaceChildren(h('p', { class: 'muted' }, 'Ingen profiler endnu.'));
+    else cb.replaceChildren(...c.data.map((x, i) => h('button', { class: 'li', onclick: () => openProfile(x.user_id) },
+      h('span', { class: 'rk' }, String(i + 1)), avatar(x, 36),
+      h('span', { class: 'tx' }, h('b', {}, x.username), h('small', {}, x.clip_count + ' klip')),
+      h('span', { class: 'vt' }, '▲ ' + x.total_votes))));
+  });
+}
+function openLists() {
+  view = 'lists'; profId = null;
+  $('#feed').hidden = true; $('#prof').hidden = false;
+  pauseAll(); active = null; setActiveNav();
+  const box = $('#prof'); box.scrollTop = 0;
+  box.replaceChildren(h('div', { class: 'profile' }, h('h2', { style: 'margin-bottom:16px' }, 'Top'),
+    h('section', { class: 'box' }, h('h3', {}, 'Top 5 klip'), h('div', { class: 'js-top5' })),
+    h('section', { class: 'box' }, h('h3', {}, 'Mest likede profiler'), h('div', { class: 'js-topc' }))));
+  side ? renderSide() : loadSide();
 }
 
 /* Profilside */
@@ -533,13 +568,13 @@ $('#upf').addEventListener('submit', async e => {
   e.preventDefault();
   const msg = $('#upmsg'), f = $('#file').files[0];
   if (!f) return;
-  if (f.size > 50 * 1024 * 1024) { msg.textContent = 'Filen er over 50 MB. Vælg et kortere klip.'; return; }
+  if (f.size > 25 * 1024 * 1024) { msg.textContent = 'Filen er over 25 MB. Vælg et kortere klip.'; return; }
   const dur = await new Promise(r => {
     const v = document.createElement('video'); v.preload = 'metadata';
     v.onloadedmetadata = () => r(v.duration); v.onerror = () => r(0);
     v.src = URL.createObjectURL(f);
   });
-  if (dur > 61) { msg.textContent = 'Klippet må højst være 60 sekunder.'; return; }
+  if (dur > 46) { msg.textContent = 'Klippet må højst være 45 sekunder.'; return; }
   msg.textContent = 'Uploader …';
   const ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
   const path = user.id + '/' + crypto.randomUUID() + '.' + ext;
@@ -572,7 +607,7 @@ async function openMod() {
 async function setStatus(c, status) {
   const { error } = await SB.from('clips').update({ status }).eq('id', c.id);
   if (error) { alert('Kunne ikke opdatere: ' + error.message); return; }
-  openMod(); if (view !== 'profile') loadClips(); loadSide();
+  openMod(); if (view === 'top' || view === 'new') loadClips(); loadSide();
 }
 
 function prefill() {
@@ -598,7 +633,7 @@ async function afterAuth() {
   }
   renderNav();
   if (view === 'profile' && !user) view = 'top';
-  if (view === 'profile') openProfile(profId); else { $('#prof').hidden = true; $('#feed').hidden = false; loadClips(); }
+  if (view === 'profile') openProfile(profId); else if (view === 'lists') openLists(); else { $('#prof').hidden = true; $('#feed').hidden = false; loadClips(); }
   loadSide();
 }
 
@@ -608,7 +643,7 @@ $('#infoBtn').onclick = () => openDlg($('#info'));
 $('#infox').onclick = () => $('#info').close();
 
 document.addEventListener('keydown', e => {
-  if (view === 'profile' || document.querySelector('dialog[open]') || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (view === 'profile' || view === 'lists' || document.querySelector('dialog[open]') || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
   const f = $('#feed');
   if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); f.scrollBy({ top: f.clientHeight }); }
   if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); f.scrollBy({ top: -f.clientHeight }); }
