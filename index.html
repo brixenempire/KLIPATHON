@@ -687,16 +687,12 @@ async function setStatus(c, status) {
 function prefill() {
   const m = (user && user.user_metadata) || {};
   const n = m.preferred_username || m.name || '';
-  if (n) { $('#pl').value = 'twitch'; $('#ha').value = n; }
+  if (n && !isAdmin) { $('#pl').value = 'twitch'; $('#ha').value = n; }
 }
 
 async function afterAuth() {
   isAdmin = false; me = null; myVotes = new Set();
   if (user) {
-    const m = user.user_metadata || {};
-    const av = m.avatar_url || m.picture;
-    /* Kun profilbilledet synkroniseres fra Twitch – visningsnavnet kan ændres i databasen */
-    if (av) await SB.from('profiles').update({ avatar_url: String(av).slice(0, 500) }).eq('id', user.id);
     const [a, v, p] = await Promise.all([
       SB.from('admins').select('user_id').maybeSingle(),
       SB.from('votes').select('clip_id'),
@@ -704,7 +700,17 @@ async function afterAuth() {
     ]);
     isAdmin = !!a.data; me = p.data;
     if (v.data) myVotes = new Set(v.data.map(x => x.clip_id));
-    prefill();
+    /* Almindelige brugere: Twitch-navn og -billede holdes opdateret. Admin-kontoen røres ikke, så navn og billede kan sættes frit. */
+    if (!isAdmin) {
+      const m = user.user_metadata || {};
+      const name = m.preferred_username || m.name, av = m.avatar_url || m.picture;
+      if (name) {
+        const upd = { username: String(name).slice(0, 60), avatar_url: av ? String(av).slice(0, 500) : null };
+        const r = await SB.from('profiles').update(upd).eq('id', user.id);
+        if (!r.error) me = upd;
+      }
+      prefill();
+    }
   }
   renderNav();
   if (view === 'profile' && !user) view = 'top';
